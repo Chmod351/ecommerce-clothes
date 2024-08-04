@@ -11,6 +11,7 @@ class ProductController {
       const products: IProduct[] = await productService.findAll(page);
       res.status(200).json(products);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -25,6 +26,7 @@ class ProductController {
         products: IProduct[] = await productService.findByQuery(query, page);
       res.status(200).json(products);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -35,11 +37,13 @@ class ProductController {
       const product: IProduct | null = await productService.findById(id);
       res.status(200).json(product);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
 
   async create(req: Request, res: Response, next: NextFunction) {
+    console.log(req.sessionID, req);
     const {
       description_es,
       description_en,
@@ -67,6 +71,7 @@ class ProductController {
       });
       res.json(createdProduct);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -100,6 +105,7 @@ class ProductController {
       });
       res.status(200).json(updatedProduct);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -110,6 +116,7 @@ class ProductController {
       const deletedProduct = await productService.deleteProduct(id);
       res.status(200).json(deletedProduct);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
