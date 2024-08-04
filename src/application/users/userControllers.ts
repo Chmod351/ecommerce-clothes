@@ -73,6 +73,7 @@ class CustomerController {
             delete userWithoutUnnecesaryInfo._id;
             delete userWithoutUnnecesaryInfo.createdAt;
             delete userWithoutUnnecesaryInfo.updatedAt;
+            delete userWithoutUnnecesaryInfo.email;
             res.status(200).json({
               message: dictionary.taskDoneSusscessfully,
               session: req.session,
