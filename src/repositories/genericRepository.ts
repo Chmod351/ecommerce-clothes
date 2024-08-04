@@ -1,3 +1,4 @@
+import { DeleteResult, IRepository } from './repositoryTypes';
 import { Inject, Service } from 'typedi';
 import mongoose, { Model } from 'mongoose';
 import { IOrder } from '../application/orders/orderTypes';
@@ -6,20 +7,6 @@ import { IUser } from '../application/users/userTypes';
 import Order from '../application/orders/orderModel';
 import Product from '../application/products/productModel';
 import User from '../application/users/userModel';
-
-interface DeleteResult {
-  deletedCount: number;
-}
-
-interface IRepository<T> {
-  findAll(page: number): Promise<T[]>;
-  findByQuery(query: object, page: number): Promise<T[]>;
-  findById(id: mongoose.Types.ObjectId | string): Promise<T | null>;
-  create(item: T): Promise<T>;
-  // eslint-disable-next-line
-  update(id: mongoose.Types.ObjectId | string, item: any): Promise<T | null>;
-  delete(id: mongoose.Types.ObjectId | string): Promise<DeleteResult>;
-}
 
 @Service()
 class GenericRepository<T> implements IRepository<T> {
