@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export interface IProduct {
+export interface IProduct extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   name_es: string;
   name_en: string;
