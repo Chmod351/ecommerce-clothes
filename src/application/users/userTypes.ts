@@ -1,3 +1,4 @@
+import { DB_ID } from '../../config/dbConfig';
 import { SessionData } from 'express-session';
 import mongoose from 'mongoose';
 
@@ -19,4 +20,12 @@ export interface IUserBody {
   email: string;
   password: string;
   username: string;
+}
+
+export interface MySessionData extends SessionData {
+  loggedin?: boolean;
+  user?: {
+    id: DB_ID;
+    type?: string;
+  };
 }
