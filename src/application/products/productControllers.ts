@@ -8,9 +8,26 @@ class ProductController {
   async findAll(req: Request, res: Response, next: NextFunction) {
     const page: number | undefined = parseInt(req.query.page as string) || 1;
     try {
-      const products: IProduct[] = await productService.findAll(page);
-      res.status(200).json(products);
+      const { data, totalItems, totalPages }: { data: IProduct[]; totalItems: number; totalPages: number } =
+        await productService.findAll(page);
+      const productsWithoutUnnecessaryInfo = data.map((product: IProduct) => {
+        return {
+          _id: product._id.toString(),
+          category: product.category,
+          description_en: product.description_en,
+          description_es: product.description_es,
+          image_url: product.image_url,
+          name_en: product.name_en,
+          name_es: product.name_es,
+          price_en: product.price_en,
+          price_es: product.price_es,
+          seasson: product.seasson,
+          weight: product.weight,
+        };
+      });
+      res.status(200).json({ data: productsWithoutUnnecessaryInfo, totalItems, totalPages });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -21,10 +38,12 @@ class ProductController {
       if (!query) {
         return res.status(400).json({ error: dictionary.missingQueryParameter });
       }
-      const page: number | undefined = parseInt(req.query.page as string) || 1,
-        products: IProduct[] = await productService.findByQuery(query, page);
-      res.status(200).json(products);
+      const page: number | undefined = parseInt(req.query.page as string) || 1;
+      const { data, totalItems, totalPages }: { data: IProduct[]; totalItems: number; totalPages: number } =
+        await productService.findByQuery(query, page);
+      res.status(200).json({ data, totalItems, totalPages });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -35,11 +54,13 @@ class ProductController {
       const product: IProduct | null = await productService.findById(id);
       res.status(200).json(product);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
 
   async create(req: Request, res: Response, next: NextFunction) {
+    console.log(req.sessionID, req);
     const {
       description_es,
       description_en,
@@ -51,6 +72,7 @@ class ProductController {
       stock,
       category,
       seasson,
+      weight,
     }: IProductBody = req.body;
     try {
       const createdProduct: IProduct = await productService.createProduct({
@@ -64,9 +86,12 @@ class ProductController {
         price_es,
         seasson,
         stock,
+        weight,
       });
+
       res.json(createdProduct);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -84,6 +109,7 @@ class ProductController {
       stock,
       category,
       seasson,
+      weight,
     } = req.body;
     try {
       const updatedProduct: IProduct | null = await productService.updateProduct(id, {
@@ -97,9 +123,12 @@ class ProductController {
         price_es,
         seasson,
         stock,
+
+        weight,
       });
       res.status(200).json(updatedProduct);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -110,6 +139,7 @@ class ProductController {
       const deletedProduct = await productService.deleteProduct(id);
       res.status(200).json(deletedProduct);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }

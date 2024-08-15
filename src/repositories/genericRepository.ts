@@ -1,3 +1,4 @@
+import { DeleteResult, IRepository } from './repositoryTypes';
 import { Inject, Service } from 'typedi';
 import mongoose, { Model } from 'mongoose';
 import { IOrder } from '../application/orders/orderTypes';
@@ -7,35 +8,28 @@ import Order from '../application/orders/orderModel';
 import Product from '../application/products/productModel';
 import User from '../application/users/userModel';
 
-interface DeleteResult {
-  deletedCount: number;
-}
-
-interface IRepository<T> {
-  findAll(page: number): Promise<T[]>;
-  findByQuery(query: object, page: number): Promise<T[]>;
-  findById(id: mongoose.Types.ObjectId | string): Promise<T | null>;
-  create(item: T): Promise<T>;
-  // eslint-disable-next-line
-  update(id: mongoose.Types.ObjectId | string, item: any): Promise<T | null>;
-  delete(id: mongoose.Types.ObjectId | string): Promise<DeleteResult>;
-}
-
 @Service()
 class GenericRepository<T> implements IRepository<T> {
   constructor(@Inject('model') private model: Model<T>) {}
-  async findAll(page: number): Promise<T[]> {
+  async findAll(page: number): Promise<{ data: T[]; totalItems: number; totalPages: number }> {
     const itemsPerPage: number = 50,
       skip: number = (page - 1) * itemsPerPage;
 
-    return await this.model.find().skip(skip).limit(itemsPerPage).exec();
+    const totalItems = await this.model.countDocuments().exec();
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const data = await this.model.find().skip(skip).limit(itemsPerPage).exec();
+
+    return { data, totalItems, totalPages };
   }
 
-  async findByQuery(query: object, page: number): Promise<T[]> {
+  async findByQuery(query: object, page: number): Promise<{ data: T[]; totalItems: number; totalPages: number }> {
     const itemsPerPage: number = 50,
       skip: number = (page - 1) * itemsPerPage;
-
-    return await this.model.find(query).skip(skip).limit(itemsPerPage).exec();
+    const totalItems = await this.model.countDocuments().exec();
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const data = await this.model.find(query).skip(skip).limit(itemsPerPage).exec();
+    return { data, totalItems, totalPages };
   }
 
   async findById(id: mongoose.Types.ObjectId | string): Promise<T | null> {

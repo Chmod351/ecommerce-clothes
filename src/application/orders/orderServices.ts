@@ -19,6 +19,10 @@ class OrderService {
   async deleteOrder(id: string) {
     return await orderRepository.delete(id);
   }
+
+  async getMonthlySalesReport(query: object, page: number) {
+    return await orderRepository.findByQuery(query, page);
+  }
 }
 
 const orderService = new OrderService();

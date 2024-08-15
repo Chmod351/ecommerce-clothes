@@ -10,10 +10,10 @@ const corsConfig = cors({
   origin: ENV.ORIGIN,
 });
 const sessionConfig = session({
-  cookie: { secure: false }, // true for HTTPS
+  cookie: { secure: ENV.ACTUAL_ENVIRONMENT === 'prod' ? true : false }, // true for HTTPS
   resave: true,
   saveUninitialized: true,
-  secret: 'your-secret-key',
+  secret: ENV.SECRET_KEY ?? '1234',
 });
 
 export default function middlewares(app: Application) {

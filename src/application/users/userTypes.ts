@@ -5,7 +5,7 @@ export interface MySessionData extends SessionData {
   loggedin?: boolean;
 }
 
-export interface IUser {
+export interface IUser extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   username: string;
   password: string;
@@ -19,4 +19,11 @@ export interface IUserBody {
   email: string;
   password: string;
   username: string;
+}
+
+export interface MySessionData extends SessionData {
+  loggedin?: boolean;
+  user?: {
+    type?: string;
+  };
 }

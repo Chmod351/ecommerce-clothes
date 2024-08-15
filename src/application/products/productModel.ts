@@ -23,7 +23,7 @@ const ProductSchema = new mongoose.Schema<IProduct>(
 
     image_url: {
       required: [true, 'The image_url is required'],
-      type: String,
+      type: [String],
     },
     name_en: {
       maxLength: [20, 'The name max length must be 20 characters'],
@@ -53,8 +53,68 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       required: [true, dictionary.thisFieldIsRequired_en],
       type: String,
     },
-    stock: {
-      min: [0, 'The stock cannot be less than 0'],
+
+    stock: [
+      {
+        color: {
+          required: true,
+          type: [String],
+        },
+        provider: {
+          required: false,
+          type: String,
+        },
+        providerCost: {
+          required: false,
+          type: Number,
+        },
+        quantity: {
+          min: [0, 'The stock cannot be less than 0'],
+          required: true,
+          type: Number,
+        },
+        size: {
+          enum: [
+            'XS',
+            'S',
+            'M',
+            'L',
+            'XL',
+            'XXL',
+            'XXXL',
+            'XXXXL',
+            '25',
+            '26',
+            '27',
+            '28',
+            '29',
+            '30',
+            '31',
+            '32',
+            '33',
+            '34',
+            '35',
+            '36',
+            '37',
+            '38',
+            '39',
+            '40',
+            '41',
+            '42',
+            '43',
+            '44',
+            '45',
+            '46',
+            '47',
+            '48',
+          ],
+          required: true,
+          type: [String],
+        },
+      },
+    ],
+
+    weight: {
       required: [true, dictionary.thisFieldIsRequired_en],
       type: Number,
     },

@@ -1,13 +1,9 @@
+import { IUser, MySessionData } from './userTypes';
 import { NextFunction, Request, Response } from 'express';
 import Encrypt from '../../helpers/encription';
-import { IUser } from './userTypes';
-import { SessionData } from 'express-session';
 import customerService from './userServices';
 import dictionary from '../../config/dictionary';
 
-interface MySessionData extends SessionData {
-  loggedin?: boolean;
-}
 const encryption = new Encrypt();
 
 class CustomerController {
@@ -60,15 +56,29 @@ class CustomerController {
       const user: IUser | null = await customerService.findByEmail(email);
       if (user !== null) {
         const match: boolean = await encryption.comparePassword(password, user.password);
-        if (user === null || !match) {
+        if (!user || !match) {
           res.status(400).json({ message: 'password or email invalid' });
         } else {
           req.session.regenerate((err) => {
             if (err) {
               return next(err);
             }
+            (req.session as MySessionData).user = {
+              type: user.type,
+            };
             (req.session as MySessionData).loggedin = true;
-            res.status(200).json({ message: dictionary.taskDoneSusscessfully, user });
+            const userWithoutUnnecesaryInfo = user.toObject();
+            delete userWithoutUnnecesaryInfo.password;
+            delete userWithoutUnnecesaryInfo.__v;
+            delete userWithoutUnnecesaryInfo._id;
+            delete userWithoutUnnecesaryInfo.createdAt;
+            delete userWithoutUnnecesaryInfo.updatedAt;
+            delete userWithoutUnnecesaryInfo.email;
+            res.status(200).json({
+              message: dictionary.taskDoneSusscessfully,
+              session: req.session,
+              user: userWithoutUnnecesaryInfo,
+            });
           });
         }
       }
@@ -90,15 +100,15 @@ class CustomerController {
       next(error);
     }
   }
-  async delete(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId: string = req.params.id;
-      const deletedCustomer = await customerService.deleteCustomer(userId);
-      res.status(200).json(deletedCustomer);
-    } catch (error) {
-      next(error);
-    }
-  }
+  // async delete(req: Request, res: Response, next: NextFunction) {
+  //   try {
+  //     const userId: string = req.params.id;
+  //     const deletedCustomer = await customerService.deleteCustomer(userId);
+  //     res.status(200).json({ message: 'deleted successfully', deletedCustomer });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 }
 
 const customerController = new CustomerController();

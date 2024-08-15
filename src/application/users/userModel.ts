@@ -5,7 +5,7 @@ import validator from 'email-validator';
 const UserSchema = new mongoose.Schema<IUser>(
   {
     email: {
-      maxlength: [320, 'Email address is too long'],
+      maxlength: [50, 'Email address is too long'],
       required: [true, 'The email is required'],
       type: String,
       unique: true,
