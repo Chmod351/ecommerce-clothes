@@ -16,7 +16,7 @@ middlewares(app);
 
 // endpoints
 app.use('/api/v1/products', products);
-app.use('/api/v1/orders/', orders);
+app.use('/api/v1/orders', orders);
 app.use('/api/v1/user', user);
 
 app.use(errorHandler);
