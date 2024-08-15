@@ -1,6 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
+import Product from '../products/productModel';
+import mongoose from 'mongoose';
 import orderService from './orderServices';
 
+function calculateTotal(cartItems: any) {
+  let total = 0;
+  cartItems.forEach((item: { productPrice: number; quantity: number }) => {
+    total += item.productPrice * item.quantity;
+  });
+
+  return total;
+}
 class OrderController {
   async findAll(req: Request, res: Response, next: NextFunction) {
     const page: number | undefined = parseInt(req.query.page as string) || 1;
@@ -25,15 +35,44 @@ class OrderController {
   }
 
   async createOrder(req: Request, res: Response, next: NextFunction) {
-    const { body } = req;
+    const { orderItems, totalPrice, ...otherData } = req.body;
+
+    // Primero, verifica que el total calculado coincida con el total proporcionado
+    const calculatedTotal = calculateTotal(orderItems);
+    console.log(calculatedTotal, totalPrice);
+    if (calculatedTotal !== totalPrice) {
+      return res.status(400).json({ error: 'Los totales no coinciden.' });
+    }
+
+    // Itera sobre cada item en orderItems para obtener el precio y la cantidad
+    const itemsWithPricesAndQuantities = await Promise.all(
+      orderItems.map(async ({ productId, quantity }: { productId: mongoose.Types.ObjectId; quantity: number }) => {
+        const product = await Product.findById(productId); // Asume que tienes un modelo de Producto
+        if (!product) {
+          throw new Error('El producto no existe');
+        }
+        return { price: product.price_es, productId, quantity }; // Retorna el precio del producto, el ID y la cantidad
+      }),
+    );
+
+    // Calcula el total esperado sumando el precio unitario de cada producto multiplicado por su cantidad
+    const expectedTotal = itemsWithPricesAndQuantities.reduce((acc, { price, quantity }) => acc + price * quantity, 0);
+    console.log(expectedTotal);
+    // Compara el total esperado con el total proporcionado
+    if (Math.abs(expectedTotal - parseFloat(totalPrice)) > 0.001) {
+      return res.status(400).json({ error: 'El total calculado no coincide con el total proporcionado.' });
+    }
+    // Si todo está bien, procede a crear la orden...
     try {
-      const createdOrder = orderService.createOrder(body);
+      const createdOrder = await orderService.createOrder({ ...otherData, totalPrice }); // Asume que el servicio crea la orden con el totalPrice
+      console.log(createdOrder);
       res.status(200).json(createdOrder);
     } catch (error) {
       console.log(error);
       next(error);
     }
   }
+
   async deleteOrder(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
