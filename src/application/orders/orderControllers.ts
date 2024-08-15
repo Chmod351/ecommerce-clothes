@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { IOrder } from './orderTypes';
 import orderService from './orderServices';
 
 class OrderController {
   async findAll(req: Request, res: Response, next: NextFunction) {
     const page: number | undefined = parseInt(req.query.page as string) || 1;
     try {
-      const orders: IOrder[] = await orderService.findAll(page);
-      res.status(200).json(orders);
+      const { data, totalItems, totalPages } = await orderService.findAll(page);
+      res.status(200).json({ data, totalItems, totalPages });
     } catch (error) {
       console.log(error);
       next(error);
