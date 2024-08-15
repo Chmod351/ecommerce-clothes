@@ -11,18 +11,25 @@ import User from '../application/users/userModel';
 @Service()
 class GenericRepository<T> implements IRepository<T> {
   constructor(@Inject('model') private model: Model<T>) {}
-  async findAll(page: number): Promise<T[]> {
+  async findAll(page: number): Promise<{ data: T[]; totalItems: number; totalPages: number }> {
     const itemsPerPage: number = 50,
       skip: number = (page - 1) * itemsPerPage;
 
-    return await this.model.find().skip(skip).limit(itemsPerPage).exec();
+    const totalItems = await this.model.countDocuments().exec();
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const data = await this.model.find().skip(skip).limit(itemsPerPage).exec();
+
+    return { data, totalItems, totalPages };
   }
 
-  async findByQuery(query: object, page: number): Promise<T[]> {
+  async findByQuery(query: object, page: number): Promise<{ data: T[]; totalItems: number; totalPages: number }> {
     const itemsPerPage: number = 50,
       skip: number = (page - 1) * itemsPerPage;
-
-    return await this.model.find(query).skip(skip).limit(itemsPerPage).exec();
+    const totalItems = await this.model.countDocuments().exec();
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const data = await this.model.find(query).skip(skip).limit(itemsPerPage).exec();
+    return { data, totalItems, totalPages };
   }
 
   async findById(id: mongoose.Types.ObjectId | string): Promise<T | null> {
