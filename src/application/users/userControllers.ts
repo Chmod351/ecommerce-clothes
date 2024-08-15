@@ -100,15 +100,15 @@ class CustomerController {
       next(error);
     }
   }
-  async delete(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId: string = req.params.id;
-      const deletedCustomer = await customerService.deleteCustomer(userId);
-      res.status(200).json(deletedCustomer);
-    } catch (error) {
-      next(error);
-    }
-  }
+  // async delete(req: Request, res: Response, next: NextFunction) {
+  //   try {
+  //     const userId: string = req.params.id;
+  //     const deletedCustomer = await customerService.deleteCustomer(userId);
+  //     res.status(200).json({ message: 'deleted successfully', deletedCustomer });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 }
 
 const customerController = new CustomerController();
