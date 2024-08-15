@@ -8,9 +8,6 @@ interface OrderItems {
 }
 export interface IOrder extends Document {
   _id: mongoose.Types.ObjectId;
-  city: string;
-  country: string;
-  dateOrdered: Date;
   orderItems: [OrderItems];
   shippingAddress1: string;
   shippingAddress2: string;
@@ -19,6 +16,9 @@ export interface IOrder extends Document {
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   totalPrice: number;
   userData: {
+    city: string;
+    country: string;
+    dateOrdered: Date;
     email: string;
     name: string;
     phone: string;
@@ -29,8 +29,6 @@ export interface IOrder extends Document {
 }
 
 export interface IOrderBody {
-  city: string;
-  country: string;
   orderItems: [OrderItems];
   paymentMethod: string;
   shippingAddress1: string;
@@ -38,6 +36,8 @@ export interface IOrderBody {
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   totalPrice: number;
   userData: {
+    city: string;
+    country: string;
     email: string;
     name: string;
     phone: string;

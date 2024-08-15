@@ -2,9 +2,6 @@ import { IOrder } from './orderTypes';
 import mongoose from 'mongoose';
 
 const OrderSchema = new mongoose.Schema({
-  city: { required: true, type: String },
-  country: { required: true, type: String },
-  dateOrdered: { default: Date.now, type: Date },
   orderItems: [
     {
       productId: {
@@ -23,14 +20,20 @@ const OrderSchema = new mongoose.Schema({
   status: { default: 'Pending', enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'], type: String },
   totalPrice: { required: true, type: Number },
   userData: {
+    city: { required: true, type: String },
+    country: { required: true, type: String },
+    dateOrdered: { default: Date.now, type: Date },
     email: { required: true, type: String },
     name: { required: true, type: String },
-    phone: { required: true, type: String },
+    phone: { required: false, type: String },
     phone2: { required: false, type: String },
-
     surname: { required: true, type: String },
+    userIdCard: {
+      required: true,
+      type: Number,
+    },
+    zip: { required: true, type: String },
   },
-  zip: { required: true, type: String },
 });
 
 const Order = mongoose.model<IOrder>('Order', OrderSchema);
