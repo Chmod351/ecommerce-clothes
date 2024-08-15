@@ -35,6 +35,7 @@ const OrderSchema = new mongoose.Schema({
     zip: { required: true, type: String },
   },
 });
+OrderSchema.index({ paymentStatus: 1, status: 1 });
 
 const Order = mongoose.model<IOrder>('Order', OrderSchema);
 export default Order;
