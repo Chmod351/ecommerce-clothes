@@ -7,7 +7,7 @@ routes.get('/', productsController.findAll);
 routes.get('/search', productsController.findByQuery);
 routes.get('/:id', idChecker.containsIdInParams, productsController.findById);
 routes.post('/create', idChecker.isUserAdmin, productsController.create);
-routes.put('/update/:id', idChecker.containsIdInParams, productsController.update);
-routes.delete('/delete/:id', idChecker.containsIdInParams, productsController.delete);
+routes.put('/update/:id', idChecker.containsIdInParams, idChecker.isUserAdmin, productsController.update);
+// routes.delete('/delete/:id', idChecker.containsIdInParams, productsController.delete);
 
 export default routes;
