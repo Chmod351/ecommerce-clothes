@@ -24,8 +24,8 @@ export interface IOrder extends Document {
     phone: string;
     phone2: string;
     surname: string;
+    zip: string;
   };
-  zip: string;
 }
 
 export interface IOrderBody {
@@ -43,6 +43,6 @@ export interface IOrderBody {
     phone: string;
     phone2: string;
     surname: string;
+    zip: string;
   };
-  zip: string;
 }
