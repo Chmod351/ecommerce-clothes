@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { MySessionData } from '../application/users/userTypes';
 import mongoose from 'mongoose';
 
 function containsIdInParams(req: Request, res: Response, next: NextFunction) {
@@ -13,8 +12,8 @@ function containsIdInParams(req: Request, res: Response, next: NextFunction) {
   next();
 }
 function isUserAdmin(req: Request, res: Response, next: NextFunction) {
-  const userType = (req.session as MySessionData).user?.type;
-  if (!req.session || userType !== 'admin') {
+  console.log(req.session);
+  if (!req.session) {
     return res.status(401).json({ error: 'Unauthorized' });
   } else {
     next();
