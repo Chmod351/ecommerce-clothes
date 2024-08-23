@@ -1,4 +1,4 @@
-import mongoose, { Document } from 'mongoose';
+import { Document } from 'mongoose';
 import { IProduct } from '../products/productTypes';
 
 interface OrderItems {
@@ -7,7 +7,8 @@ interface OrderItems {
   quantity: number;
 }
 export interface IOrder extends Document {
-  _id: mongoose.Types.ObjectId;
+  commentaries: string;
+  deliveryMode: string;
   orderItems: [OrderItems];
   shippingAddress1: string;
   shippingAddress2: string;
@@ -27,13 +28,14 @@ export interface IOrder extends Document {
     zip: string;
   };
 }
-
 export interface IOrderBody {
   orderItems: [OrderItems];
   paymentMethod: string;
+  commentaries: string;
+  deliveryMode: string;
   shippingAddress1: string;
-  shippingAddress2: string;
-  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  // shippingAddress2: string;
+  // status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   totalPrice: number;
   userData: {
     city: string;
