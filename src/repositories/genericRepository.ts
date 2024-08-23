@@ -26,9 +26,13 @@ class GenericRepository<T> implements IRepository<T> {
   async findByQuery(query: object, page: number): Promise<{ data: T[]; totalItems: number; totalPages: number }> {
     const itemsPerPage: number = 50,
       skip: number = (page - 1) * itemsPerPage;
-    const totalItems = await this.model.countDocuments().exec();
+
+    const totalItems = await this.model.countDocuments(query).exec();
+
     const totalPages = Math.ceil(totalItems / itemsPerPage);
+
     const data = await this.model.find(query).skip(skip).limit(itemsPerPage).exec();
+
     return { data, totalItems, totalPages };
   }
 
