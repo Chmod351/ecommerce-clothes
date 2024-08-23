@@ -10,8 +10,18 @@ class ProductServices {
     return await productRepository.findAll(page);
   }
   async findByQuery(query: string, page: number) {
+    const searchRegex = new RegExp(query, 'i');
     const q: object = {
-      $or: [{ name: { $options: 'i', $regex: query } }, { description: { $options: 'i', $regex: query } }],
+      $or: [
+        { name_es: searchRegex },
+        { name_en: searchRegex },
+        { description_es: searchRegex },
+        { description_en: searchRegex },
+        { category: searchRegex },
+        { seasson: searchRegex },
+
+        // otros campos que quieras incluir en la búsqueda
+      ],
     };
     return await productRepository.findByQuery(q, page);
   }
