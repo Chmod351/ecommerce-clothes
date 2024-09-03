@@ -42,6 +42,9 @@ class GenericRepository<T> implements IRepository<T> {
   async findByEmail(email: string): Promise<T | null> {
     return await this.model.findOne({ email }).exec();
   }
+  async aggregate(pipeline: any[]): Promise<T[]> {
+    return await this.model.aggregate(pipeline).exec();
+  }
   async create(item: T): Promise<T> {
     return await this.model.create(item);
   }

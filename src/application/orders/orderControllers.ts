@@ -108,38 +108,68 @@ class OrderController {
 
   async getMonthlySalesReport(req: Request, res: Response, next: NextFunction) {
     try {
-      const { month, year } = req.query;
-      const startOfMonth = new Date(`${year}-${month}-01`);
-      const endOfMonth = new Date(startOfMonth);
-      endOfMonth.setMonth(endOfMonth.getMonth() + 1);
-      endOfMonth.setDate(1);
+      // const { month, year } = req.params;
 
       const pipeline = [
         {
           $match: {
-            createdAt: {
-              $gte: startOfMonth,
-              $lt: endOfMonth,
-            },
+            status: 'Delivered',
+            // createdAt: {
+            //   $gte: new Date(`${year}-${month}-01`),
+            //   // $lt: new Date(year, parseInt(month) + 1, 0),
+            // },
+          },
+        },
+        {
+          $unwind: '$orderItems',
+        },
+        {
+          $lookup: {
+            as: 'productInfo',
+            foreignField: '_id',
+            from: 'products',
+            localField: 'orderItems._id',
+          },
+        },
+        {
+          $unwind: {
+            path: '$productInfo',
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
           $group: {
-            _id: { $month: '$createdAt' },
-            city: { $first: '$shippingAddress.city' },
-            country: { $first: '$shippingAddress.country' },
-            date: { $first: '$createdAt' },
-            sucessfulOrders: { $sum: { $cond: [{ $eq: ['$status', 'Delivered'] }, 1, 0] } },
-            totalOrders: { $sum: 1 },
-            totalProducts: { $sum: '$products.quantity' },
-            totalSales: { $sum: '$totalPrice' },
+            _id: '$_id',
+            orderItems: {
+              $addToSet: {
+                productPrice: '$orderItems.productPrice',
+                product_id: '$orderItems._id',
+                quantity: '$orderItems.quantity',
+                stockInfo: {
+                  $map: {
+                    as: 'stockItem',
+                    in: {
+                      color: '$$stockItem.color',
+                      provider: '$$stockItem.provider',
+                      providerCost: '$$stockItem.providerCost',
+                      quantity: '$$stockItem.quantity',
+                      size: '$$stockItem.size',
+                    },
+                    input: '$productInfo.stock',
+                  },
+                },
+              },
+            },
           },
         },
         {
-          $sort: { month: 1, year: 1 },
+          $sort: {
+            createdAt: -1,
+          },
         },
       ];
-      const salesReport = await orderService.getMonthlySalesReport(pipeline, 1);
+
+      const salesReport = await orderService.getMonthlySalesReport(pipeline);
       res.status(200).json(salesReport);
     } catch (error) {
       console.log(error);
