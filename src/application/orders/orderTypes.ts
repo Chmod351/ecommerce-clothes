@@ -1,10 +1,11 @@
-import { Document } from 'mongoose';
-import { IProduct } from '../products/productTypes';
+import mongoose, { Document } from 'mongoose';
 
 interface OrderItems {
-  productId: IProduct;
+  _id: mongoose.Types.ObjectId;
   productPrice: number;
   quantity: number;
+  color: string;
+  size: string;
 }
 export interface IOrder extends Document {
   commentaries: string;
@@ -12,7 +13,8 @@ export interface IOrder extends Document {
   orderItems: [OrderItems];
   shippingAddress1: string;
   shippingAddress2: string;
-  paymentMethod: string;
+  paymentId: string;
+  paymentMethod: 'Mercado Pago' | 'Transferencia';
   paymentStatus: 'Pending' | 'Failed' | 'Success';
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   totalPrice: number;
@@ -34,6 +36,7 @@ export interface IOrderBody {
   commentaries: string;
   deliveryMode: string;
   shippingAddress1: string;
+  paymentId: string;
   // shippingAddress2: string;
   // status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   totalPrice: number;

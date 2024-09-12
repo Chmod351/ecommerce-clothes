@@ -6,6 +6,7 @@ const OrderSchema = new mongoose.Schema({
     required: false,
     type: String,
   },
+
   deliveryMode: {
     enum: ['PickUp', 'Standard', 'Express_CABA', 'Express_GBA'],
     required: [true, 'This field is required'],
@@ -38,8 +39,12 @@ const OrderSchema = new mongoose.Schema({
       },
     },
   ],
-
+  paymentId: {
+    required: false,
+    type: String,
+  },
   paymentMethod: {
+    enum: ['Mercado Pago', 'Transferencia'],
     required: [true, 'This field is required'],
     type: String,
   },
