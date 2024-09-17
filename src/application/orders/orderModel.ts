@@ -2,35 +2,118 @@ import { IOrder } from './orderTypes';
 import mongoose from 'mongoose';
 
 const OrderSchema = new mongoose.Schema({
+  commentaries: {
+    required: false,
+    type: String,
+  },
+
+  deliveryMode: {
+    enum: ['PickUp', 'Standard', 'Express_CABA', 'Express_GBA'],
+    required: [true, 'This field is required'],
+    type: String,
+  },
   orderItems: [
     {
-      productId: {
+      _id: {
         ref: 'Product',
         required: true,
         type: mongoose.Types.ObjectId,
       },
-      productPrice: { required: true, type: Number },
-      quantity: { min: 1, required: true, type: Number },
+      color: {
+        required: [true, 'This field is required'],
+        type: String,
+      },
+
+      productPrice: {
+        required: true,
+        type: Number,
+      },
+      quantity: {
+        min: [1, 'The quantity cannot be less than 1'],
+        required: true,
+        type: Number,
+      },
+      size: {
+        required: [true, 'The size field is required'],
+        type: String,
+      },
     },
   ],
-  paymentMethod: { required: true, type: String },
-  paymentStatus: { default: 'Pending', enum: ['Pending', 'Failed', 'Success'], type: String },
-  shippingAddress1: { required: true, type: String },
-  shippingAddress2: { required: false, type: String },
-  status: { default: 'Pending', enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'], type: String },
-  totalPrice: { required: true, type: Number },
+  paymentId: {
+    required: false,
+    type: String,
+  },
+  paymentMethod: {
+    enum: ['Mercado Pago', 'Transferencia'],
+    required: [true, 'This field is required'],
+    type: String,
+  },
+  paymentStatus: {
+    default: 'Pending',
+    enum: ['Pending', 'Failed', 'Success'],
+    type: String,
+  },
+  shippingAddress1: {
+    required: [true, 'shippingAddress1 is required'],
+    type: String,
+  },
+  shippingAddress2: {
+    required: false,
+    type: String,
+  },
+  status: {
+    default: 'Pending',
+    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+    type: String,
+  },
+  totalPrice: {
+    require: [true, 'totalPrice is required'],
+    type: Number,
+  },
   userData: {
-    city: { required: true, type: String },
-    country: { required: true, type: String },
-    dateOrdered: { default: Date.now, type: Date },
-    email: { required: true, type: String },
-    name: { required: true, type: String },
-    phone: { required: false, type: String },
-    phone2: { required: false, type: String },
-    surname: { required: true, type: String },
+    city: {
+      required: [true, 'city is required'],
+      type: String,
+    },
+    country: {
+      required: [true, 'country is required'],
+      type: String,
+    },
+    dateOrdered: {
+      default: Date.now,
+      type: Date,
+    },
+    email: {
+      required: [true, 'email is required'],
+      type: String,
+    },
+    floor: {
+      required: false,
+      type: String,
+    },
+    name: {
+      required: [true, 'name is required'],
+      type: String,
+    },
+    phone: {
+      required: false,
+      type: String,
+    },
+    phone2: {
+      required: false,
+      type: String,
+    },
+    state: {
+      required: [true, 'state is required'],
+      type: String,
+    },
+    surname: {
+      required: [true, 'surname is required'],
+      type: String,
+    },
     userIdCard: {
-      required: true,
-      type: Number,
+      required: [true, 'userIdCard is required'],
+      type: String,
     },
     zip: { required: true, type: String },
   },

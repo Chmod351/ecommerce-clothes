@@ -2,7 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 
 function containsIdInParams(req: Request, res: Response, next: NextFunction) {
-  const id: string = req.params._id;
+  console.log('params', req.params);
+  const { id } = req.params;
   if (!id) {
     return next(new Error('Missing id parameter'));
   } else if (!mongoose.Types.ObjectId.isValid(id)) {

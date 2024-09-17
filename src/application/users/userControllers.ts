@@ -53,6 +53,7 @@ class CustomerController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
+      console.log('email y password', email, password);
       const user: IUser | null = await customerService.findByEmail(email);
       if (user !== null) {
         const match: boolean = await encryption.comparePassword(password, user.password);
@@ -66,6 +67,7 @@ class CustomerController {
             (req.session as MySessionData).user = {
               type: user.type,
             };
+            console.log(user);
             (req.session as MySessionData).loggedin = true;
             const userWithoutUnnecesaryInfo = user.toObject();
             delete userWithoutUnnecesaryInfo.password;
@@ -81,6 +83,8 @@ class CustomerController {
             });
           });
         }
+      } else {
+        res.status(400).json({ message: 'password or email invalid' });
       }
     } catch (error) {
       next(error);

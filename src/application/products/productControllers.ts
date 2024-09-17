@@ -34,7 +34,8 @@ class ProductController {
 
   async findByQuery(req: Request, res: Response, next: NextFunction) {
     try {
-      const query: string | undefined = req.query.query as string;
+      console.log('query', req.query);
+      const query: string | undefined = req.query.q as string;
       if (!query) {
         return res.status(400).json({ error: dictionary.missingQueryParameter });
       }

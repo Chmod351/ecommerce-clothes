@@ -1,17 +1,20 @@
 import mongoose, { Document } from 'mongoose';
-import { IProduct } from '../products/productTypes';
 
 interface OrderItems {
-  productId: IProduct;
+  _id: mongoose.Types.ObjectId;
   productPrice: number;
   quantity: number;
+  color: string;
+  size: string;
 }
 export interface IOrder extends Document {
-  _id: mongoose.Types.ObjectId;
+  commentaries: string;
+  deliveryMode: string;
   orderItems: [OrderItems];
   shippingAddress1: string;
   shippingAddress2: string;
-  paymentMethod: string;
+  paymentId: string;
+  paymentMethod: 'Mercado Pago' | 'Transferencia';
   paymentStatus: 'Pending' | 'Failed' | 'Success';
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   totalPrice: number;
@@ -27,13 +30,15 @@ export interface IOrder extends Document {
     zip: string;
   };
 }
-
 export interface IOrderBody {
   orderItems: [OrderItems];
   paymentMethod: string;
+  commentaries: string;
+  deliveryMode: string;
   shippingAddress1: string;
-  shippingAddress2: string;
-  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  paymentId: string;
+  // shippingAddress2: string;
+  // status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   totalPrice: number;
   userData: {
     city: string;
