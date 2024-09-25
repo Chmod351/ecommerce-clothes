@@ -20,7 +20,7 @@ class OrderService {
     return await orderRepository.delete(id);
   }
 
-  async getMonthlySalesReport(query: object[]) {
+  async getAggregate(query: object[]) {
     return await orderRepository.aggregate(query);
   }
 }

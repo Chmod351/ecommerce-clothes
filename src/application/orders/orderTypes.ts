@@ -13,7 +13,14 @@ export interface IOrder extends Document {
   orderItems: [OrderItems];
   shippingAddress1: string;
   shippingAddress2: string;
-  paymentId: string;
+  mercadoPagoInfo: {
+    issuer_id: string;
+    installments: number;
+    paymentMethodId: string;
+    payer: { email: string; identification: { type: string; number: string } };
+    token: string;
+    transaction_amount: number;
+  };
   paymentMethod: 'Mercado Pago' | 'Transferencia';
   paymentStatus: 'Pending' | 'Failed' | 'Success';
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
@@ -36,9 +43,15 @@ export interface IOrderBody {
   commentaries: string;
   deliveryMode: string;
   shippingAddress1: string;
-  paymentId: string;
-  // shippingAddress2: string;
-  // status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  mercadoPagoInfo: {
+    issuer_id: string;
+    installments: number;
+    paymentMethodId: string;
+    payer: { email: string; identification: { type: string; number: string } };
+    token: string;
+    transaction_amount: number;
+  };
+  paymentStatus: string;
   totalPrice: number;
   userData: {
     city: string;

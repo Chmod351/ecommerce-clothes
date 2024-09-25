@@ -1,12 +1,12 @@
+import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { NextFunction, Request, Response } from 'express';
+import ENV from '../../config/envConfig';
+import Order from './orderModel';
 import axios from 'axios';
 import mongoose from 'mongoose';
 import orderService from './orderServices';
 import productService from '../products/productServices';
-import Product from '../products/productModel';
-import { IOrder, IOrderBody } from './orderTypes';
-import { IProduct } from '../products/productTypes';
-import Order from './orderModel';
+
 const precios = {
   CABA: 5500,
   Delivery: 6000,
@@ -54,10 +54,10 @@ class OrderController {
 
   async updateOrderStatus(req: Request, res: Response, next: NextFunction) {
     // Obtener el estado de pago
-    const { status, id, paymentId, paymentMethod } = req.body;
-    if (!status || !id || !paymentId || !paymentMethod) {
+    const { status, id, mercadoPagoInfo, paymentMethod } = req.body;
+    if (!status || !id || !mercadoPagoInfo || !paymentMethod) {
       return res.status(400).json({
-        error: `Faltan datos para actualizar el estado de la orden. status:${status}, id:${id},  paymentId:${paymentId},  paymentMethod:${paymentMethod}`,
+        error: `Faltan datos para actualizar el estado de la orden. status:${status}, id:${id},  mercadoPagoInfo:${mercadoPagoInfo},  paymentMethod:${paymentMethod}`,
       });
     }
     // Iniciar la sesión de transacción
@@ -67,7 +67,7 @@ class OrderController {
     try {
       // Verificar el estado de pago de Mercado Pago si corresponde
       if (paymentMethod === 'Mercado Pago') {
-        const mercadoPagoUrl = `https://api.mercadopago.com/v1/payments/${paymentId}`;
+        const mercadoPagoUrl = `https://api.mercadopago.com/v1/payments/${mercadoPagoInfo.token}`;
         const paymentMp = await axios.get(mercadoPagoUrl, {
           headers: {
             Authorization: `Bearer ${process.env.MERCADO_PAGO_CLIENT_ID}`,
@@ -145,81 +145,118 @@ class OrderController {
   }
 
   async createOrder(req: Request, res: Response, next: NextFunction) {
-    const { orderItems, totalPrice, userData, commentaries, deliveryMode, paymentMethod, shippingAddress1, paymentId } =
-      req.body;
-
-    let deliveryCost = 0;
-
-    if (deliveryMode === 'Pickup') {
-      deliveryCost = precios.Pickup;
-    }
-    if (deliveryMode === 'Express_CABA') {
-      deliveryCost = precios.CABA;
-    }
-    if (deliveryMode === 'Express_GBA') {
-      deliveryCost = precios.GBA;
-    }
-    if (deliveryMode === 'Standard') {
-      deliveryCost = precios.Delivery;
-    }
-
-    if (!orderItems || !totalPrice || !userData || !deliveryMode || !paymentMethod || !shippingAddress1) {
-      console.log(orderItems, totalPrice, userData, deliveryMode, paymentMethod, shippingAddress1);
-      return res.status(400).json({ error: 'Faltan campos requeridos.' });
-    }
-    // Primero, verifica que el total calculado coincida con el total proporcionado
-    const calculatedTotal = calculateTotal(orderItems, deliveryMode);
-    console.log(calculatedTotal, totalPrice);
-    if (calculatedTotal !== totalPrice) {
-      return res.status(400).json({ error: 'Los totales no coinciden.' });
-    }
-
-    // Itera sobre cada item en orderItems para obtener el precio y la cantidad
-    const itemsWithPricesAndQuantities = await Promise.all(
-      orderItems.map(async ({ _id, quantity }: { _id: mongoose.Types.ObjectId; quantity: number }) => {
-        let product;
-        try {
-          product = await productService.findById(_id);
-          if (!product) {
-            throw new Error(`El producto no existe    ${_id}`);
-          }
-        } catch (e) {
-          console.log(e);
-          throw new Error('El producto no existe');
-        }
-
-        return { _id, price: product.price_es, quantity }; // Retorna el precio del producto, el ID y la cantidad
-      }),
-    );
-
-    // Calcula el total esperado sumando el precio unitario de cada producto multiplicado por su cantidad
-    const expectedTotal = itemsWithPricesAndQuantities.reduce((acc, { price, quantity }) => acc + price * quantity, 0);
-    console.log('expectedTotal', expectedTotal);
-    const finalTotal = expectedTotal + deliveryCost;
-    // Compara el total esperado con el total proporcionado
-    if (Math.abs(finalTotal - parseFloat(totalPrice)) > 0.001) {
-      return res.status(400).json({ error: 'El total calculado no coincide con el total proporcionado.' });
-    }
-    console.log(userData, commentaries, deliveryMode, totalPrice);
     try {
-      const createdOrder = await orderService.createOrder({
-        commentaries: commentaries,
-        deliveryMode: deliveryMode,
-        orderItems: orderItems,
-        paymentId: paymentId,
-        paymentMethod: paymentMethod,
-        shippingAddress1: shippingAddress1,
-        totalPrice: totalPrice,
+      const {
+        orderItems,
+        totalPrice,
+        userData,
+        commentaries,
+        deliveryMode,
+        paymentMethod,
+        shippingAddress1,
+        mercadoPagoInfo,
+      } = req.body;
+
+      let deliveryCost = 0;
+
+      if (deliveryMode === 'Pickup') {
+        deliveryCost = precios.Pickup;
+      }
+      if (deliveryMode === 'Express_CABA') {
+        deliveryCost = precios.CABA;
+      }
+      if (deliveryMode === 'Express_GBA') {
+        deliveryCost = precios.GBA;
+      }
+      if (deliveryMode === 'Standard') {
+        deliveryCost = precios.Delivery;
+      }
+
+      if (!orderItems || !totalPrice || !userData || !deliveryMode || !paymentMethod || !shippingAddress1) {
+        console.log(orderItems, totalPrice, userData, deliveryMode, paymentMethod, shippingAddress1);
+        return res.status(400).json({ error: 'Faltan campos requeridos.' });
+      }
+
+      const calculatedTotal = calculateTotal(orderItems, deliveryMode);
+      if (calculatedTotal !== totalPrice) {
+        return res.status(400).json({ error: 'Los totales no coinciden.' });
+      }
+
+      const itemsWithPricesAndQuantities = await Promise.all(
+        orderItems.map(async ({ _id, quantity }: { _id: mongoose.Types.ObjectId; quantity: number }) => {
+          const product = await productService.findById(_id);
+          if (!product) throw new Error(`El producto no existe ${_id}`);
+
+          return { _id, price: product.price_es, quantity };
+        }),
+      );
+
+      const expectedTotal = itemsWithPricesAndQuantities.reduce(
+        (acc, { price, quantity }) => acc + price * quantity,
+        0,
+      );
+      const finalTotal = expectedTotal + deliveryCost;
+
+      if (Math.abs(finalTotal - parseFloat(totalPrice)) > 0.001) {
+        return res.status(400).json({ error: 'El total calculado no coincide con el total proporcionado.' });
+      }
+
+      let createdOrder;
+
+      if (paymentMethod === 'Mercado Pago') {
+        try {
+          const client = new MercadoPagoConfig({ accessToken: ENV.ACCESS_TOKEN_MP ?? '' });
+          const payment = new Payment(client);
+          const paymentResponse: any = await payment.create({
+            body: {
+              ...mercadoPagoInfo,
+              description: 'Orden de compra',
+            },
+          });
+          console.log({ paymentResponse });
+          if (!paymentResponse) {
+            return res.status(400).json({ error: 'No se pudo realizar la orden porque falló el pago.' });
+          }
+
+          createdOrder = await orderService.createOrder({
+            commentaries,
+            deliveryMode,
+            mercadoPagoInfo,
+            orderItems,
+            paymentMethod,
+            paymentStatus: 'Success',
+            shippingAddress1,
+            totalPrice,
+            userData: { ...userData },
+          });
+
+          return res.status(200).json(createdOrder);
+        } catch (error) {
+          console.log('mercado pago');
+          console.log(error);
+          return next(error);
+        }
+      }
+      // Si el método de pago no es Mercado Pago o se salta el proceso anterior
+      createdOrder = await orderService.createOrder({
+        commentaries,
+        deliveryMode,
+        mercadoPagoInfo,
+        orderItems,
+        paymentMethod,
+        paymentStatus: 'Pending',
+        shippingAddress1,
+        totalPrice,
         userData: { ...userData },
       });
-      console.log(createdOrder);
-      res.status(200).json(createdOrder);
+
+      return res.status(200).json(createdOrder);
     } catch (error) {
+      console.log('GENERAL');
       console.log(error);
-      next(error);
+      return next(error);
     }
   }
-
   async deleteOrder(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
@@ -233,10 +270,19 @@ class OrderController {
   // sell metrics here
 
   async getMonthlySalesReport(req: Request, res: Response, next: NextFunction) {
+    const startDate = new Date();
+    startDate.setDate(1);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(startDate.getTime());
+    endDate.setMonth(endDate.getMonth() + 1);
     try {
       const pipeline = [
         {
           $match: {
+            /*     created_at: { */
+            /* $gte: startDate, */
+            /* $lt: endDate, */
+            /* }, */
             status: 'Delivered',
           },
         },
@@ -289,7 +335,7 @@ class OrderController {
         },
       ];
 
-      const salesReport = await orderService.getMonthlySalesReport(pipeline);
+      const salesReport = await orderService.getAggregate(pipeline);
       res.status(200).json(salesReport);
     } catch (error) {
       console.log(error);

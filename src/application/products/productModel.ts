@@ -48,12 +48,24 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       required: [true, dictionary.thisFieldIsRequired_es],
       type: Number,
     },
-
+    sale: {
+      quantity: {
+        default: 0,
+        type: Number,
+      },
+      status: {
+        default: false,
+        type: Boolean,
+      },
+      until: {
+        default: Date.now,
+        type: Date,
+      },
+    },
     seasson: {
       required: [true, dictionary.thisFieldIsRequired_en],
       type: String,
     },
-
     stock: [
       {
         color: {

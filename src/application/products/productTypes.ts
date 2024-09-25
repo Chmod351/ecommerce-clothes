@@ -4,6 +4,11 @@ export interface IProduct extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   name_es: string;
   name_en: string;
+  sale: {
+    status: boolean;
+    quantity: number;
+    until: Date;
+  };
   description_es: string;
   description_en: string;
   image_url: [string];

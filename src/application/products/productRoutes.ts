@@ -5,6 +5,7 @@ const routes = Router();
 
 routes.get('/', productsController.findAll);
 routes.get('/search', productsController.findByQuery);
+routes.get('/stock', idChecker.isUserAdmin, productsController.getActualStockFromAllProducts);
 routes.post('/create', idChecker.isUserAdmin, productsController.create);
 routes.get('/id/:id', idChecker.containsIdInParams, productsController.findById);
 routes.put('/update/:id', idChecker.containsIdInParams, idChecker.isUserAdmin, productsController.update);
