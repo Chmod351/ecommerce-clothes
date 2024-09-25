@@ -1,12 +1,12 @@
+import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { NextFunction, Request, Response } from 'express';
+import ENV from '../../config/envConfig';
+import Order from './orderModel';
 import axios from 'axios';
 import mongoose from 'mongoose';
 import orderService from './orderServices';
 import productService from '../products/productServices';
-import { MercadoPagoConfig, Payment } from 'mercadopago';
-import ENV from '../../config/envConfig';
 
-import Order from './orderModel';
 const precios = {
   CABA: 5500,
   Delivery: 6000,
@@ -270,10 +270,19 @@ class OrderController {
   // sell metrics here
 
   async getMonthlySalesReport(req: Request, res: Response, next: NextFunction) {
+    const startDate = new Date();
+    startDate.setDate(1);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(startDate.getTime());
+    endDate.setMonth(endDate.getMonth() + 1);
     try {
       const pipeline = [
         {
           $match: {
+            /*     created_at: { */
+            /* $gte: startDate, */
+            /* $lt: endDate, */
+            /* }, */
             status: 'Delivered',
           },
         },
@@ -326,7 +335,7 @@ class OrderController {
         },
       ];
 
-      const salesReport = await orderService.getMonthlySalesReport(pipeline);
+      const salesReport = await orderService.getAggregate(pipeline);
       res.status(200).json(salesReport);
     } catch (error) {
       console.log(error);
