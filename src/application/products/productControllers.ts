@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import dictionary from '../../config/dictionary';
 import mongoose from 'mongoose';
 import productService from './productServices';
+import Product from './productModel';
 
 class ProductController {
   async findAll(req: Request, res: Response, next: NextFunction) {
@@ -139,6 +140,19 @@ class ProductController {
     try {
       const deletedProduct = await productService.deleteProduct(id);
       res.status(200).json(deletedProduct);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+  async getActualStockFromAllProducts(req: Request, res: Response, next: NextFunction) {
+    try {
+      const products = await Product.find();
+      const stockInfo = products.map((product) => ({
+        name: product.name_es,
+        stock: product.stock,
+      }));
+      res.status(200).json(stockInfo);
     } catch (error) {
       console.log(error);
       next(error);

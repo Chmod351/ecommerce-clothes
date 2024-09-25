@@ -6,7 +6,7 @@ const routes = Router();
 // routes.get('/', userControllers.findAll);
 // routes.get('/search', userControllers.findByQuery);
 // routes.get('/:id', idChecker.containsIdInParams, userControllers.findById);
-// routes.post('/create', userControllers.create);
+routes.post('/create', userControllers.create);
 routes.post('/login', userControllers.login);
 routes.post('/logout', userControllers.logout);
 routes.put('/update/:id', idChecker.containsIdInParams, userControllers.update);
