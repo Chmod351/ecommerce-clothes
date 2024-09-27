@@ -54,10 +54,10 @@ class OrderController {
 
   async updateOrderStatus(req: Request, res: Response, next: NextFunction) {
     // Obtener el estado de pago
-    const { status, id, mercadoPagoInfo, paymentMethod } = req.body;
-    if (!status || !id || !mercadoPagoInfo || !paymentMethod) {
+    const { status, id, paymentId, paymentMethod } = req.body;
+    if (!status || !id || !paymentMethod) {
       return res.status(400).json({
-        error: `Faltan datos para actualizar el estado de la orden. status:${status}, id:${id},  mercadoPagoInfo:${mercadoPagoInfo},  paymentMethod:${paymentMethod}`,
+        error: `Faltan datos para actualizar el estado de la orden. status:${status}, id:${id},  paymentMethod:${paymentMethod}`,
       });
     }
     // Iniciar la sesión de transacción
@@ -67,7 +67,7 @@ class OrderController {
     try {
       // Verificar el estado de pago de Mercado Pago si corresponde
       if (paymentMethod === 'Mercado Pago') {
-        const mercadoPagoUrl = `https://api.mercadopago.com/v1/payments/${mercadoPagoInfo.token}`;
+        const mercadoPagoUrl = `https://api.mercadopago.com/v1/payments/${paymentId}`;
         const paymentMp = await axios.get(mercadoPagoUrl, {
           headers: {
             Authorization: `Bearer ${process.env.MERCADO_PAGO_CLIENT_ID}`,
@@ -223,6 +223,7 @@ class OrderController {
             deliveryMode,
             mercadoPagoInfo,
             orderItems,
+            paymentId: paymentResponse.id,
             paymentMethod,
             paymentStatus: 'Success',
             shippingAddress1,

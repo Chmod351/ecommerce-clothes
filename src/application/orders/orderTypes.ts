@@ -51,6 +51,7 @@ export interface IOrderBody {
     token: string;
     transaction_amount: number;
   };
+  paymentId?: string;
   paymentStatus: string;
   totalPrice: number;
   userData: {
