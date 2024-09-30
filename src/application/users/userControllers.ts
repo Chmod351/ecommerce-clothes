@@ -33,6 +33,7 @@ class CustomerController {
     const { username, password, email } = req.body;
 
     if (!username || !password || !email) {
+      console.log('faltan campos', username, password, email);
       return res.status(400).json({ error: dictionary.badRequest });
     }
     try {
