@@ -26,25 +26,25 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       type: [String],
     },
     name_en: {
-      maxLength: [20, 'The name max length must be 20 characters'],
+      maxLength: [50, 'The name max length must be 50 characters'],
       minlength: [10, 'The name min length should be at least 10 characters'],
       required: [true, dictionary.thisFieldIsRequired_en],
       type: String,
     },
     name_es: {
-      maxLength: [20, 'The name max length must be 20 characters'],
+      maxLength: [50, 'The name max length must be 50 characters'],
       minlength: [10, 'The name min length should be at least 10 characters'],
       required: [true, dictionary.thisFieldIsRequired_es],
       type: String,
     },
 
     price_en: {
-      min: [100, 'The price cannot be less than 100'],
+      min: [1, 'The price cannot be less than 1'],
       required: [true, dictionary.thisFieldIsRequired_en],
       type: Number,
     },
     price_es: {
-      min: [100, 'The price cannot be less than 100'],
+      min: [1, 'The price cannot be less than 1'],
       required: [true, dictionary.thisFieldIsRequired_es],
       type: Number,
     },
